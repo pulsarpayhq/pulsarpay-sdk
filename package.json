@@ -1,6 +1,6 @@
 {
   "name": "pulsarpay-sdk",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Official TypeScript SDK for the Pulsarpay API — automated payment infrastructure for APIs and autonomous agents.",
   "type": "module",
   "main": "./dist/index.js",
