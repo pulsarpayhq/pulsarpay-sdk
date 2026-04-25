@@ -1,0 +1,59 @@
+{
+  "name": "pulsarpay-sdk",
+  "version": "0.1.0",
+  "description": "Official TypeScript SDK for the Pulsarpay API — automated payment infrastructure for APIs and autonomous agents.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "pulsarpay",
+    "payments",
+    "sdk",
+    "ai-agents",
+    "usdc",
+    "solana"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0",
+    "@vitest/coverage-v8": "^1.6.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "vitest": {
+    "coverage": {
+      "provider": "v8",
+      "reporter": ["text", "lcov", "html"],
+      "thresholds": {
+        "lines": 85,
+        "functions": 85,
+        "branches": 85,
+        "statements": 85
+      },
+      "include": ["src/**/*.ts"],
+      "exclude": ["src/__tests__/**", "src/types/**"]
+    }
+  }
+}
