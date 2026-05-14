@@ -6,6 +6,8 @@ export type Currency = "USDC" | "USDT" | "USD";
 
 export type ChargeStatus = "PENDING" | "SUCCESS" | "FAILED" | "EXPIRED";
 
+export type PayoutStatus = "PENDING" | "COMPLETED" | "FAILED";
+
 // ── Agents ────────────────────────────────────
 
 export interface AgentRegistrationRequest {
@@ -86,6 +88,8 @@ export interface EarningsResponse {
   totalEarned: number;
   /** Total number of successful payment transactions. */
   totalCharges: number;
+  /** Accumulated earnings not yet paid out. */
+  currentBalance: number;
 }
 
 // ── Withdrawals ───────────────────────────────
@@ -97,13 +101,81 @@ export interface WithdrawRequest {
   walletAddress: string;
 }
 
+export interface WithdrawBreakdown {
+  /** Total amount requested before fees. */
+  grossAmount: number;
+  /** Platform fee percentage applied (e.g. `"3%"`). */
+  platformFeeRate: string;
+  /** Absolute fee amount deducted. */
+  platformFee: number;
+  /** Final amount transferred after deducting the fee. */
+  netAmount: number;
+  /** Token used for the withdrawal. */
+  currency: string;
+  /** Destination Solana wallet address. */
+  walletAddress: string;
+  /** Blockchain network used for the transfer. */
+  network: string;
+}
+
 export interface WithdrawResponse {
   /** Confirms the withdrawal was broadcasted to the network. */
   success: boolean;
   /** Internal tracking ID for the withdrawal. */
   payoutId: string;
-  /** Solana transaction signature (TXID). Track on Solscan. */
-  signature: string;
+  /** Detailed breakdown of amounts, fees, and destination. */
+  breakdown: WithdrawBreakdown;
+}
+
+// ── Payouts ───────────────────────────────────
+
+export interface PayoutDestination {
+  /** Blockchain network used for the transfer. */
+  network: string;
+  /** Destination Solana wallet address. */
+  walletAddress: string;
+}
+
+export interface PayoutItem {
+  /** Unique identifier for the payout record. */
+  id: string;
+  /** ID of the agent who initiated the withdrawal. */
+  agentId: string;
+  /** Token used for the withdrawal. */
+  currency: string;
+  /** Current state of the withdrawal. */
+  status: PayoutStatus;
+  /** Destination network and wallet address. */
+  destination: PayoutDestination;
+  /** External reference ID for the payout. */
+  externalId: string;
+  /** On-chain transaction hash. `null` until processed. */
+  txHash: string | null;
+  /** Timestamp when the withdrawal was initiated. */
+  createdAt: string;
+  /** Timestamp when the withdrawal was processed. `null` if still pending. */
+  processedAt: string | null;
+  /** Net amount transferred after deducting the platform fee. */
+  amount: number;
+  /** Platform fee deducted from the gross withdrawal amount. */
+  fee: number;
+  /** Fee rate applied to this withdrawal (e.g. `"3%"`). */
+  platformFeeRate: string;
+}
+
+export interface PayoutListResponse {
+  /** All withdrawal records for the authenticated agent. */
+  payouts: PayoutItem[];
+}
+
+export interface PayoutSingleResponse {
+  /** The withdrawal record matching the provided `payoutId`. */
+  payout: PayoutItem;
+}
+
+export interface ListWithdrawalsOptions {
+  /** When provided, filters the result to a single payout matching this ID. */
+  payoutId?: string;
 }
 
 // ── SDK Config ────────────────────────────────

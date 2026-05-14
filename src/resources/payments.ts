@@ -10,6 +10,9 @@ import type {
   CreateChargeResponse,
   EarningsResponse,
   ListChargesOptions,
+  ListWithdrawalsOptions,
+  PayoutListResponse,
+  PayoutSingleResponse,
   WithdrawRequest,
   WithdrawResponse,
 } from "../types/index.js";
@@ -152,6 +155,34 @@ export class PaymentsResource {
   }
 
   /**
+   * List all withdrawal requests made by this agent.
+   *
+   * Pass a `payoutId` to retrieve a single specific payout; omit it to get
+   * the full list.
+   *
+   * @example
+   * ```ts
+   * // All withdrawals
+   * const { payouts } = await client.payments.listWithdrawals() as PayoutListResponse;
+   *
+   * // Single withdrawal
+   * const { payout } = await client.payments.listWithdrawals({
+   *   payoutId: "cmoqbpavp00071ry1t2iyr1hw",
+   * }) as PayoutSingleResponse;
+   * ```
+   */
+  async listWithdrawals(
+    options: ListWithdrawalsOptions = {}
+  ): Promise<PayoutListResponse | PayoutSingleResponse> {
+    return this.http.request<PayoutListResponse | PayoutSingleResponse>({
+      method: "GET",
+      path: "/api/v1/agents/withdraw",
+      headers: { "x-agent-key": this.resolveAgentKey() },
+      query: { payoutId: options.payoutId },
+    });
+  }
+
+  /**
    * Withdraw earned balance to a Solana wallet in USDC.
    *
    * Minimum withdrawal: **1.00 USDC**.
@@ -164,7 +195,7 @@ export class PaymentsResource {
    *   amount: 100,
    *   walletAddress: "8ixbQzsFc9FkxegG7aumq3h1XCGDkRSN23xeLTnZiyHr",
    * });
-   * console.log(`Tx signature: ${payout.signature}`);
+   * console.log(`Net: ${payout.breakdown.netAmount} ${payout.breakdown.currency}`);
    * ```
    */
   async withdraw(

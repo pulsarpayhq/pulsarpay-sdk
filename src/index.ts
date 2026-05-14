@@ -20,6 +20,7 @@ export type {
   PulsarpayConfig,
   Currency,
   ChargeStatus,
+  PayoutStatus,
   AgentRegistrationRequest,
   AgentRegistrationResponse,
   CreateChargeRequest,
@@ -29,7 +30,13 @@ export type {
   ListChargesOptions,
   EarningsResponse,
   WithdrawRequest,
+  WithdrawBreakdown,
   WithdrawResponse,
+  PayoutDestination,
+  PayoutItem,
+  PayoutListResponse,
+  PayoutSingleResponse,
+  ListWithdrawalsOptions,
   Pagination,
 } from "./types/index.js";
 

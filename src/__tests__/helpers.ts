@@ -110,11 +110,60 @@ export const fixtures = {
     currency: "USDC",
     totalEarned: 1550.75,
     totalCharges: 142,
+    currentBalance: 18.889,
   },
 
   withdrawal: {
     success: true,
-    payoutId: "cmnpeptvy0005l404gq5zy7nx",
-    signature: "5K8Yj2XW...",
+    payoutId: "cmoqbpavp00071ry1t2iyr1hw",
+    breakdown: {
+      grossAmount: 100,
+      platformFeeRate: "3%",
+      platformFee: 3,
+      netAmount: 97,
+      currency: "USDC",
+      walletAddress: "7AEaiRXEiwRne29zXjadxMRznarugZ1K3PmuAqeWvuFX",
+      network: "SOL",
+    },
+  },
+
+  payoutItem: {
+    id: "cmoqbpavp00071ry1t2iyr1hw",
+    agentId: "cmoon78e7000g1rvv9ju59ame",
+    currency: "USDC",
+    status: "COMPLETED" as const,
+    destination: {
+      network: "SOL",
+      walletAddress: "7AEaiRXEiwRne29zXjadxMRznarugZ1K3PmuAqeWvuFX",
+    },
+    externalId: "34343477",
+    txHash: null,
+    createdAt: "2026-05-03T22:09:23.027Z",
+    processedAt: null,
+    amount: 97,
+    fee: 3,
+    platformFeeRate: "3%",
+  },
+
+  payoutList: {
+    payouts: [
+      {
+        id: "cmoqbpavp00071ry1t2iyr1hw",
+        agentId: "cmoon78e7000g1rvv9ju59ame",
+        currency: "USDC",
+        status: "COMPLETED" as const,
+        destination: {
+          network: "SOL",
+          walletAddress: "7AEaiRXEiwRne29zXjadxMRznarugZ1K3PmuAqeWvuFX",
+        },
+        externalId: "34343477",
+        txHash: null,
+        createdAt: "2026-05-03T22:09:23.027Z",
+        processedAt: null,
+        amount: 97,
+        fee: 3,
+        platformFeeRate: "3%",
+      },
+    ],
   },
 };

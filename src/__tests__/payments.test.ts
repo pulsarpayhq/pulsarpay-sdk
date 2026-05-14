@@ -273,6 +273,7 @@ describe("payments.getEarnings()", () => {
     expect(result.currency).toBe("USDC");
     expect(result.totalEarned).toBe(1550.75);
     expect(result.totalCharges).toBe(142);
+    expect(result.currentBalance).toBe(18.889);
   });
 
   it("sends GET to /api/v1/agents/earnings with x-agent-key", async () => {
@@ -304,8 +305,82 @@ describe("payments.getEarnings()", () => {
 // withdraw
 // ─────────────────────────────────────────────────────────────
 
+describe("payments.listWithdrawals()", () => {
+  it("returns a list of payouts when no payoutId is provided", async () => {
+    mockFetch(mockJsonResponse(fixtures.payoutList));
+
+    const client = makeClient();
+    const result = await client.payments.listWithdrawals() as { payouts: typeof fixtures.payoutList.payouts };
+
+    expect(result.payouts).toHaveLength(1);
+    expect(result.payouts[0].id).toBe("cmoqbpavp00071ry1t2iyr1hw");
+    expect(result.payouts[0].status).toBe("COMPLETED");
+    expect(result.payouts[0].amount).toBe(97);
+  });
+
+  it("returns a single payout when payoutId is provided", async () => {
+    mockFetch(mockJsonResponse({ payout: fixtures.payoutItem }));
+
+    const client = makeClient();
+    const result = await client.payments.listWithdrawals({
+      payoutId: "cmoqbpavp00071ry1t2iyr1hw",
+    }) as { payout: typeof fixtures.payoutItem };
+
+    expect(result.payout.id).toBe("cmoqbpavp00071ry1t2iyr1hw");
+    expect(result.payout.destination.network).toBe("SOL");
+    expect(result.payout.fee).toBe(3);
+    expect(result.payout.platformFeeRate).toBe("3%");
+  });
+
+  it("sends payoutId as a query param when provided", async () => {
+    const fetchMock = mockFetch(mockJsonResponse({ payout: fixtures.payoutItem }));
+
+    const client = makeClient();
+    await client.payments.listWithdrawals({ payoutId: "cmoqbpavp00071ry1t2iyr1hw" });
+
+    const [url] = (fetchMock as ReturnType<typeof vi.fn>).mock.calls[0] as [string];
+    expect(url).toContain("payoutId=cmoqbpavp00071ry1t2iyr1hw");
+  });
+
+  it("does not send payoutId query param when omitted", async () => {
+    const fetchMock = mockFetch(mockJsonResponse(fixtures.payoutList));
+
+    const client = makeClient();
+    await client.payments.listWithdrawals();
+
+    const [url] = (fetchMock as ReturnType<typeof vi.fn>).mock.calls[0] as [string];
+    expect(url).not.toContain("payoutId");
+  });
+
+  it("sends GET to /api/v1/agents/withdraw with x-agent-key", async () => {
+    const fetchMock = mockFetch(mockJsonResponse(fixtures.payoutList));
+
+    const client = makeClient();
+    await client.payments.listWithdrawals();
+
+    const [url, options] = (fetchMock as ReturnType<typeof vi.fn>).mock.calls[0] as [string, RequestInit];
+    expect(url).toContain("/api/v1/agents/withdraw");
+    expect(options.method).toBe("GET");
+    const headers = options.headers as Record<string, string>;
+    expect(headers["x-agent-key"]).toBe(AGENT_KEY);
+  });
+
+  it("throws PulsarpayUnauthorizedError on invalid agent (401)", async () => {
+    mockFetch(mockJsonResponse({ error: "invalid agent" }, 401));
+
+    const client = makeClient();
+    await expect(client.payments.listWithdrawals()).rejects.toThrow(
+      PulsarpayUnauthorizedError
+    );
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// withdraw
+// ─────────────────────────────────────────────────────────────
+
 describe("payments.withdraw()", () => {
-  it("returns withdrawal result with signature on success", async () => {
+  it("returns withdrawal result with breakdown on success", async () => {
     mockFetch(mockJsonResponse(fixtures.withdrawal));
 
     const client = makeClient();
@@ -315,8 +390,12 @@ describe("payments.withdraw()", () => {
     });
 
     expect(result.success).toBe(true);
-    expect(result.payoutId).toBe("cmnpeptvy0005l404gq5zy7nx");
-    expect(result.signature).toBe("5K8Yj2XW...");
+    expect(result.payoutId).toBe("cmoqbpavp00071ry1t2iyr1hw");
+    expect(result.breakdown.grossAmount).toBe(100);
+    expect(result.breakdown.platformFee).toBe(3);
+    expect(result.breakdown.netAmount).toBe(97);
+    expect(result.breakdown.platformFeeRate).toBe("3%");
+    expect(result.breakdown.network).toBe("SOL");
   });
 
   it("sends x-agent-key and Idempotency-Key headers", async () => {
