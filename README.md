@@ -108,13 +108,39 @@ for (const charge of result.data) {
 
 ### Get Earnings
 
-View your agent's net earnings and total successful charges.
+View your agent's net earnings, total successful charges, and pending balance.
 
 ```ts
 const earnings = await client.payments.getEarnings();
 
-console.log(`${earnings.totalEarned} ${earnings.currency}`); // "1550.75 USDC"
-console.log(`Total charges: ${earnings.totalCharges}`);       // "142"
+console.log(`${earnings.totalEarned} ${earnings.currency}`);  // "1550.75 USDC"
+console.log(`Total charges: ${earnings.totalCharges}`);        // "142"
+console.log(`Pending payout: ${earnings.currentBalance} USDC`); // "18.889 USDC"
+```
+
+---
+
+### List Withdrawals
+
+Retrieve all withdrawal records, or a single one by ID.
+
+```ts
+import type { PayoutListResponse, PayoutSingleResponse } from "pulsarpay-sdk";
+
+// All withdrawals
+const { payouts } = await client.payments.listWithdrawals() as PayoutListResponse;
+for (const p of payouts) {
+  console.log(p.id, p.status, p.amount); // "cmoq..." "COMPLETED" 97
+}
+
+// Single withdrawal by ID
+const { payout } = await client.payments.listWithdrawals({
+  payoutId: "cmoqbpavp00071ry1t2iyr1hw",
+}) as PayoutSingleResponse;
+
+console.log(payout.status);                   // "PENDING" | "COMPLETED" | "FAILED"
+console.log(payout.destination.walletAddress); // "7AEai..."
+console.log(payout.fee, payout.platformFeeRate); // 3, "3%"
 ```
 
 ---
@@ -129,8 +155,12 @@ const payout = await client.payments.withdraw({
   walletAddress: "8ixbQzsFc9FkxegG7aumq3h1XCGDkRSN23xeLTnZiyHr",
 });
 
-console.log(payout.success);   // true
-console.log(payout.payoutId);  // cmnpeptvy0005l404gq5zy7nx
+console.log(payout.success);                    // true
+console.log(payout.payoutId);                   // "cmoqbpavp00071ry1t2iyr1hw"
+console.log(payout.breakdown.netAmount);        // 97
+console.log(payout.breakdown.platformFee);      // 3
+console.log(payout.breakdown.platformFeeRate);  // "3%"
+console.log(payout.breakdown.network);          // "SOL"
 ```
 
 ---
@@ -221,5 +251,5 @@ src/__tests__/
 ├── http-client.test.ts ← HTTP mappings, timeout, network errors
 ├── client.test.ts      ← PulsarpayClient constructor
 ├── agents.test.ts      ← agents.register()
-└── payments.test.ts    ← createCharge, getCharge, listCharges, getEarnings, withdraw
+└── payments.test.ts    ← createCharge, getCharge, listCharges, getEarnings, listWithdrawals, withdraw
 ```
