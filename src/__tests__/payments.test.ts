@@ -83,7 +83,7 @@ describe("payments.createCharge()", () => {
     const fetchMock = mockFetch(mockJsonResponse(fixtures.charge));
 
     const client = makeClient();
-    const payload = { amount: 1.5, currency: "USDT" as const, description: "Embedding call" };
+    const payload = { amount: 1.5, currency: "USD" as const, description: "Embedding call" };
     await client.payments.createCharge(payload, { userKey: USER_KEY });
 
     const [url, options] = (fetchMock as ReturnType<typeof vi.fn>).mock.calls[0] as [string, RequestInit];
@@ -270,10 +270,12 @@ describe("payments.getEarnings()", () => {
     const client = makeClient();
     const result = await client.payments.getEarnings();
 
-    expect(result.currency).toBe("USDC");
-    expect(result.totalEarned).toBe(1550.75);
-    expect(result.totalCharges).toBe(142);
-    expect(result.currentBalance).toBe(18.889);
+    expect(result.earnings).toHaveLength(2);
+    expect(result.earnings[0].currency).toBe("USDC");
+    expect(result.earnings[0].totalEarned).toBe(1550.75);
+    expect(result.earnings[0].totalCharges).toBe(142);
+    expect(result.earnings[0].currentBalance).toBe(18.889);
+    expect(result.earnings[1].currency).toBe("USD");
   });
 
   it("sends GET to /api/v1/agents/earnings with x-agent-key", async () => {
@@ -386,6 +388,7 @@ describe("payments.withdraw()", () => {
     const client = makeClient();
     const result = await client.payments.withdraw({
       amount: 100,
+      currency: "USDC",
       walletAddress: "8ixbQzsFc9FkxegG7aumq3h1XCGDkRSN23xeLTnZiyHr",
     });
 
@@ -403,7 +406,7 @@ describe("payments.withdraw()", () => {
 
     const client = makeClient();
     await client.payments.withdraw(
-      { amount: 100, walletAddress: "8ixbQzsFc9FkxegG7aumq3h1XCGDkRSN23xeLTnZiyHr" },
+      { amount: 100, currency: "USDC", walletAddress: "8ixbQzsFc9FkxegG7aumq3h1XCGDkRSN23xeLTnZiyHr" },
       { idempotencyKey: IDEMPOTENCY_KEY }
     );
 
@@ -419,6 +422,7 @@ describe("payments.withdraw()", () => {
     const client = makeClient();
     await client.payments.withdraw({
       amount: 50,
+      currency: "USDC",
       walletAddress: "8ixbQzsFc9FkxegG7aumq3h1XCGDkRSN23xeLTnZiyHr",
     });
 
@@ -435,6 +439,7 @@ describe("payments.withdraw()", () => {
     const client = makeClient();
     const payload = {
       amount: 200,
+      currency: "USDC" as const,
       walletAddress: "8ixbQzsFc9FkxegG7aumq3h1XCGDkRSN23xeLTnZiyHr",
     };
     await client.payments.withdraw(payload);
@@ -450,7 +455,7 @@ describe("payments.withdraw()", () => {
 
     const client = makeClient();
     await expect(
-      client.payments.withdraw({ amount: 9999, walletAddress: "valid-wallet" })
+      client.payments.withdraw({ amount: 9999, currency: "USDC", walletAddress: "valid-wallet" })
     ).rejects.toThrow(PulsarpayBadRequestError);
   });
 
@@ -459,7 +464,7 @@ describe("payments.withdraw()", () => {
 
     const client = makeClient();
     await expect(
-      client.payments.withdraw({ amount: 10, walletAddress: "not-a-solana-address" })
+      client.payments.withdraw({ amount: 10, currency: "USDC", walletAddress: "not-a-solana-address" })
     ).rejects.toThrow(PulsarpayBadRequestError);
   });
 
@@ -470,6 +475,7 @@ describe("payments.withdraw()", () => {
     await expect(
       client.payments.withdraw({
         amount: 10,
+        currency: "USDC",
         walletAddress: "8ixbQzsFc9FkxegG7aumq3h1XCGDkRSN23xeLTnZiyHr",
       })
     ).rejects.toThrow(PulsarpayUnauthorizedError);

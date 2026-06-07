@@ -108,14 +108,17 @@ for (const charge of result.data) {
 
 ### Get Earnings
 
-View your agent's net earnings, total successful charges, and pending balance.
+View your agent's net earnings, total successful charges, and pending balance. Each supported currency (`USDC` and `USD`) has an independent balance entry.
 
 ```ts
-const earnings = await client.payments.getEarnings();
+const { earnings } = await client.payments.getEarnings();
 
-console.log(`${earnings.totalEarned} ${earnings.currency}`);  // "1550.75 USDC"
-console.log(`Total charges: ${earnings.totalCharges}`);        // "142"
-console.log(`Pending payout: ${earnings.currentBalance} USDC`); // "18.889 USDC"
+for (const entry of earnings) {
+  console.log(entry.currency);        // "USDC" | "USD"
+  console.log(entry.totalEarned);     // net earned after fees
+  console.log(entry.totalCharges);    // number of successful charges
+  console.log(entry.currentBalance);  // available for withdrawal
+}
 ```
 
 ---
@@ -147,11 +150,13 @@ console.log(payout.fee, payout.platformFeeRate); // 3, "3%"
 
 ### Withdraw Funds
 
-Transfer earned USDC to a Solana wallet. Minimum withdrawal is **1.00 USDC**.
+Transfer earned balance to a Solana wallet (USDC) or a PayPal account (USD). Minimum withdrawal is **1.00**. A 3% platform fee is deducted from the gross amount.
 
 ```ts
+// USDC → Solana wallet
 const payout = await client.payments.withdraw({
   amount: 100,
+  currency: "USDC",
   walletAddress: "8ixbQzsFc9FkxegG7aumq3h1XCGDkRSN23xeLTnZiyHr",
 });
 
@@ -161,6 +166,15 @@ console.log(payout.breakdown.netAmount);        // 97
 console.log(payout.breakdown.platformFee);      // 3
 console.log(payout.breakdown.platformFeeRate);  // "3%"
 console.log(payout.breakdown.network);          // "SOL"
+
+// USD → PayPal
+const payout = await client.payments.withdraw({
+  amount: 50,
+  currency: "USD",
+  walletAddress: "your-paypal-id@example.com",
+});
+
+console.log(payout.breakdown.network);  // "PAYPAL"
 ```
 
 ---

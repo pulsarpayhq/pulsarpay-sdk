@@ -183,9 +183,11 @@ export class PaymentsResource {
   }
 
   /**
-   * Withdraw earned balance to a Solana wallet in USDC.
+   * Withdraw earned balance. Supports two currencies:
+   * - `USDC` → sent to a Solana wallet address
+   * - `USD` → sent to a PayPal account
    *
-   * Minimum withdrawal: **1.00 USDC**.
+   * Minimum withdrawal: **1.00**. A 3% platform fee is deducted.
    * An idempotency key is required to prevent double payouts — one is
    * auto-generated if not provided.
    *
@@ -193,6 +195,7 @@ export class PaymentsResource {
    * ```ts
    * const payout = await client.payments.withdraw({
    *   amount: 100,
+   *   currency: "USDC",
    *   walletAddress: "8ixbQzsFc9FkxegG7aumq3h1XCGDkRSN23xeLTnZiyHr",
    * });
    * console.log(`Net: ${payout.breakdown.netAmount} ${payout.breakdown.currency}`);

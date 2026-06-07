@@ -107,10 +107,20 @@ export const fixtures = {
   },
 
   earnings: {
-    currency: "USDC",
-    totalEarned: 1550.75,
-    totalCharges: 142,
-    currentBalance: 18.889,
+    earnings: [
+      {
+        currency: "USDC" as const,
+        totalEarned: 1550.75,
+        totalCharges: 142,
+        currentBalance: 18.889,
+      },
+      {
+        currency: "USD" as const,
+        totalEarned: 200.0,
+        totalCharges: 10,
+        currentBalance: 50.0,
+      },
+    ],
   },
 
   withdrawal: {

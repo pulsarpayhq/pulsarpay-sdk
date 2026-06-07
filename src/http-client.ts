@@ -75,6 +75,7 @@ export class HttpClient {
           case 400:
             throw new PulsarpayBadRequestError(message, data);
           case 401:
+          case 403:
             throw new PulsarpayUnauthorizedError(message, data);
           case 402:
             throw new PulsarpayInsufficientFundsError(message, data);

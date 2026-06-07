@@ -156,6 +156,15 @@ describe("HttpClient — HTTP error mapping", () => {
     ).rejects.toThrow(PulsarpayUnauthorizedError);
   });
 
+  it("throws PulsarpayUnauthorizedError on 403 (disabled agent)", async () => {
+    mockFetch(mockJsonResponse({ error: "agent is disabled" }, 403));
+
+    const client = makeClient();
+    await expect(
+      client.request({ method: "GET", path: "/api/v1/agents/earnings" })
+    ).rejects.toThrow(PulsarpayUnauthorizedError);
+  });
+
   it("throws PulsarpayInsufficientFundsError on 402", async () => {
     mockFetch(mockJsonResponse({ error: "insufficient funds" }, 402));
 

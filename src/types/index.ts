@@ -2,7 +2,9 @@
 // Pulsarpay SDK — Types
 // ─────────────────────────────────────────────
 
-export type Currency = "USDC" | "USDT" | "USD";
+export type Currency = "USDC" | "USD";
+
+export type PayoutNetwork = "SOL" | "PAYPAL";
 
 export type ChargeStatus = "PENDING" | "SUCCESS" | "FAILED" | "EXPIRED";
 
@@ -54,7 +56,7 @@ export interface ChargeItem {
   id: string;
   idempotencyKey: string;
   amount: number;
-  currency: string;
+  currency: Currency;
   description: string;
   status: ChargeStatus;
   createdAt: string;
@@ -81,23 +83,30 @@ export interface ListChargesOptions {
 
 // ── Earnings ──────────────────────────────────
 
-export interface EarningsResponse {
-  /** Currency in which earnings are denominated. */
-  currency: string;
+export interface EarningsEntry {
+  /** Currency for this earnings entry. */
+  currency: Currency;
   /** Net amount earned after platform fees. Available for withdrawal. */
   totalEarned: number;
-  /** Total number of successful payment transactions. */
+  /** Total number of successful charges in this currency. */
   totalCharges: number;
-  /** Accumulated earnings not yet paid out. */
+  /** Current balance available for withdrawal in this currency. */
   currentBalance: number;
+}
+
+export interface EarningsResponse {
+  /** One entry per supported currency. Each currency maintains an independent balance. */
+  earnings: EarningsEntry[];
 }
 
 // ── Withdrawals ───────────────────────────────
 
 export interface WithdrawRequest {
-  /** Amount of USDC to withdraw (minimum: 1.00). */
+  /** Amount to withdraw in the specified currency (minimum: 1.00). */
   amount: number;
-  /** Destination Solana (SPL) wallet address. */
+  /** Currency to withdraw. Use `USDC` for a Solana wallet or `USD` for PayPal. */
+  currency: Currency;
+  /** Destination address: Solana wallet for `USDC`, PayPal ID/email for `USD`. */
   walletAddress: string;
 }
 
@@ -111,11 +120,11 @@ export interface WithdrawBreakdown {
   /** Final amount transferred after deducting the fee. */
   netAmount: number;
   /** Token used for the withdrawal. */
-  currency: string;
-  /** Destination Solana wallet address. */
+  currency: Currency;
+  /** Destination address — Solana wallet or PayPal ID/email. */
   walletAddress: string;
-  /** Blockchain network used for the transfer. */
-  network: string;
+  /** Destination network. `SOL` for Solana (USDC), `PAYPAL` for USD. */
+  network: PayoutNetwork;
 }
 
 export interface WithdrawResponse {
@@ -130,9 +139,9 @@ export interface WithdrawResponse {
 // ── Payouts ───────────────────────────────────
 
 export interface PayoutDestination {
-  /** Blockchain network used for the transfer. */
-  network: string;
-  /** Destination Solana wallet address. */
+  /** Destination network. `SOL` for Solana (USDC), `PAYPAL` for USD. */
+  network: PayoutNetwork;
+  /** Destination address — Solana wallet or PayPal ID/email. */
   walletAddress: string;
 }
 
@@ -142,7 +151,7 @@ export interface PayoutItem {
   /** ID of the agent who initiated the withdrawal. */
   agentId: string;
   /** Token used for the withdrawal. */
-  currency: string;
+  currency: Currency;
   /** Current state of the withdrawal. */
   status: PayoutStatus;
   /** Destination network and wallet address. */
